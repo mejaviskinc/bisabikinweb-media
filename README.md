@@ -1,13 +1,20 @@
-# BisaBikinWeb — MEDIA
+# BisaBikinWeb — Media (GitHub Pages)
 
-Repo khusus GitHub Pages untuk `media.bisabikinweb.site` (Artikel, berita, dan redaksi).
+Subdomain: **media.bisabikinweb.site**.
 
-Source aplikasi: https://github.com/mejaviskinc/bisabikinweb
+**Media bukan website baru dan tidak punya CMS ataupun database sendiri.** Semua artikel, berita, redaksi, dan gambar berasal dari website utama [BisaBikinWeb](https://bisabikinweb.site/) melalui repository source [mejaviskinc/bisabikinweb](https://github.com/mejaviskinc/bisabikinweb).
 
-Workflow deploy di `.github/workflows/deploy-pages.yml` akan checkout source utama dan membuat `pages-media`. Jangan mengedit file build manual, karena perubahan sebaiknya dilakukan pada repo utama.
+- Membuka homepage Media langsung mengarahkan ke **`/artikel/`**, menggunakan tampilan artikel yang sama dari website utama.
+- **`/artikel/`**, **`/berita/`**, dan halaman detail artikel dibuat dari data yang sama dengan website utama. Source build mengambil konten publik dari Supabase project yang dikonfigurasi pada website utama, dengan fallback bawaan yang sama.
+- Tidak ada akun admin, CMS, database, atau sistem publikasi terpisah di repo ini.
+- Workflow [Deploy BisaBikinWeb media to GitHub Pages](https://github.com/mejaviskinc/bisabikinweb-media/actions) otomatis membangun dari source utama saat dipicu dan pada jadwal setiap jam. Karena hosting GitHub Pages statis, pembaruan mungkin menunggu build berikutnya.
+- Agar tidak menggandakan hasil pencarian saat migrasi, Media tetap **noindex** dan URL kanonis tetap mengarah ke domain utama sampai migrasi SEO disepakati.
 
-Untuk aktivasi: Settings → Pages → Source = GitHub Actions; Custom domain = `media.bisabikinweb.site`.
+## Deployment
 
-DNS: `CNAME media → mejaviskinc.github.io` (hanya record host tersebut, jangan mengganti record domain utama atau email).
+1. Settings → Pages → Source: **GitHub Actions**.
+2. Custom domain: `media.bisabikinweb.site`.
+3. DNS CNAME `media` → `mejaviskinc.github.io`.
+4. Periksa HTTPS dan [Actions](https://github.com/mejaviskinc/bisabikinweb-media/actions).
 
-SEO masih noindex selama perpindahan; canonical di domain utama tidak berubah sampai migrasi URL disetujui. 
+**Edit konten hanya di BisaBikinWeb utama, bukan di repo Media ini.**
