@@ -1,0 +1,80 @@
+name: Deploy BisaBikinWeb media to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '31 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-production
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout main BisaBikinWeb source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: mejaviskinc/bisabikinweb
+          ref: main
+          path: source
+          persist-credentials: false
+      - name: Setup Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        working-directory: source
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Run source tests
+        working-directory: source
+        run: npm test
+      - name: Build this subdomain
+        working-directory: source
+        run: |
+          npm run build:media
+          node scripts/prepare-pages-subdomains.mjs media
+      - name: Validate deployment package
+        working-directory: source
+        run: |
+          test -f pages-media/index.html
+          test -f pages-media/CNAME
+          test -f pages-media/.nojekyll
+          test -d pages-media/assets
+          test ! -f pages-media/_headers
+          test ! -f pages-media/_redirects
+          test ! -f pages-media/sitemap.xml
+          test -f pages-media/artikel/index.html
+          test -f pages-media/berita/index.html
+          test ! -d pages-media/checkout
+          test ! -d pages-media/admin
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          name: github-pages-media
+          path: source/pages-media
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        with:
+          artifact_name: github-pages-media
