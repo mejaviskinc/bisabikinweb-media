@@ -9,10 +9,16 @@ export function normalizeBbwebArticle(row) {
   const rawCategory = String(row.category || '').toLowerCase().trim();
   let category = 'Bisnis';
   if (rawCategory.includes('ekspor')) category = 'Ekspor';
+  else if (rawCategory.includes('olahraga')||rawCategory.includes('sport')) category = 'Olahraga';
+  else if (rawCategory.includes('otomotif')) category = 'Otomotif';
+  else if (rawCategory.includes('hiburan')||rawCategory.includes('entertainment')) category = 'Hiburan';
+  else if (rawCategory.includes('opini')) category = 'Opini';
+  else if (rawCategory.includes('politik')) category = 'Politik';
+  else if (rawCategory.includes('pemerintah')) category = 'Pemerintahan';
   else if (rawCategory.includes('teknolog') || rawCategory.includes('ai')) category = 'Teknologi';
   else if (rawCategory.includes('internasional') || rawCategory.includes('dunia')) category = 'Internasional';
   else if (rawCategory.includes('pendidikan')) category = 'Pendidikan';
-  else if (rawCategory.includes('politik') || rawCategory.includes('nasional') || rawCategory.includes('pemerintah')) category = 'Nasional';
+  else if (rawCategory.includes('nasional')) category = 'Nasional';
   else if (rawCategory.includes('ekonomi')) category = 'Ekonomi';
   else if (rawCategory.includes('lifestyle')) category = 'Lifestyle';
   else if (rawCategory.includes('digital') || rawCategory.includes('website')) category = 'Digital';
