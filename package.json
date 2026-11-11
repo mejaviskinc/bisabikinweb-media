@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --check src/admin.js && node --test tests/*.test.mjs",
     "dev": "npm run build && npx --yes http-server dist -p 4173 -c-1"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
