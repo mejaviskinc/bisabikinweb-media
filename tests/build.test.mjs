@@ -11,7 +11,7 @@ test('jalur kategori dan artikel dibuat terpisah',async()=>{await access(join(ro
 test('konten demonstrasi tidak terindeks dan tidak mengaku berita aktual',async()=>{const h=await read('index.html');assert.match(h,/noindex,nofollow/);assert.match(h,/konten demonstrasi/i);await assert.rejects(access(join(root,'dist/sitemap.xml')))});
 test('custom domain terisolasi',async()=>{assert.equal((await read('CNAME')).trim(),'media.bisabikinweb.site');assert.match(await read('robots.txt'),/Allow: \/\n/)});
 test('panel redaksi tanpa kunci rahasia',async()=>{const config=await read('admin/config.js');assert.doesNotMatch(config,/sb_secret_|service_role/);assert.match(await read('admin/index.html'),/Ruang Redaksi/);assert.match(await read('admin/admin.js'),/auth\/v1\/token/)});
-test('search page memiliki data pencarian dan filter',async()=>{const html=await read('cari/index.html');assert.match(html,/searchData/);assert.match(html,/categorySelect/)});
+test('search page memiliki data pencarian dan filter',async()=>{const html=await read('cari/index.html');assert.match(html,/searchData/);assert.match(html,/categorySelect/);assert.match(html,/dateSelect/);assert.match(html,/pagination/)});
 
 test('admin Media memiliki dashboard penuh untuk CMS utama',async()=>{
  const h=await read('admin/index.html');
