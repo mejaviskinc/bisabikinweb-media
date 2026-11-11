@@ -25,3 +25,25 @@ test('admin Media memiliki dashboard penuh untuk CMS utama',async()=>{
  assert.doesNotMatch(js,/media_staff|media_articles/);
  assert.doesNotMatch(h,/http-equiv="refresh"/);
 });
+
+
+test('portal media memiliki arsip, RSS, dan halaman transparansi redaksi',async()=>{
+  for(const path of ['arsip/index.html','pedoman-media-siber/index.html','kode-etik/index.html','koreksi/index.html','privasi/index.html','pasang-iklan/index.html','kerja-sama/index.html','kontak/index.html']){
+    assert.match(await read(path),/BisaBikinWeb Media/);
+  }
+  assert.match(await read('feed.xml'),/<rss version="2.0">/);
+  assert.match(await read('arsip/index.html'),/Arsip berita/);
+  assert.match(await read('index.html'),/href="\\/feed.xml"/);
+  await assert.rejects(access(join(root,'dist/news-sitemap.xml')));
+});
+test('dashboard menyediakan audit editorial, ekspor CSV, dan checklist publikasi',async()=>{
+  const html=await read('admin/index.html');
+  const js=await read('admin/admin.js');
+  assert.match(html,/Audit Editorial/);
+  assert.match(html,/exportCsvBtn/);
+  assert.match(html,/verifySources/);
+  assert.match(html,/verifyRights/);
+  assert.match(js,/function renderAudit/);
+  assert.match(js,/function exportCsv/);
+  assert.match(js,/verifyRights/);
+});
