@@ -9,7 +9,7 @@ Source V2 untuk **`media.bisabikinweb.site`**. Desain baru, tetapi tetap membaca
 - GitHub Action mengambil source Media sendiri **dan** file konfigurasi publishable dari repository `mejaviskinc/bisabikinweb` secara read-only.
 - Build mengambil data publik artikel (`published`, `is_active`) melalui REST dengan public/publishable API key. **Tidak menggunakan service-role key.**
 - Validasi build membatalkan deployment jika Supabase tidak dapat diakses atau data kosong, sehingga situs terakhir yang berhasil di-deploy tetap aman.
-- Redaksi masih memakai CMS existing di `https://bisabikinweb.site/admin/` melalui halaman `/admin/` Media. Tidak membuat database redaksi kedua.
+- Dashboard admin **asli** tersedia di `https://media.bisabikinweb.site/admin/`, dengan login akun admin BisaBikinWeb yang terverifikasi. Dashboard dapat mengelola artikel `bbweb_articles` melalui RLS yang sudah ada, tanpa database redaksi kedua.
 - Seluruh halaman Media **`noindex`** selama mencerminkan artikel yang URL kanonisnya masih di situs utama. Tidak membuat sitemap baru agar tidak bersaing dengan URL lama. Indeksasi baru membutuhkan migrasi SEO khusus.
 - Artikel bertipe `Berita Bisnis` muncul di rubrik Bisnis, artikel `Ekspor` di rubrik Ekspor. Artikel demonstrasi tidak dipublikasikan saat mode produksi.
 - Kontak, hak penggunaan foto, dan validitas jurnalistik masing-masing konten tetap harus dikurasi secara editorial.
@@ -31,9 +31,11 @@ MEDIA_CONTENT_SOURCE=bbweb MEDIA_MAIN_CONFIG_PATH=source-main/static-source/lib/
 
 **Jangan memakai `MEDIA_INDEXABLE=true` saat konten duplikat.**
 
-## Integrasi media CMS terpisah (opsional, belum dijalankan)
+## Dashboard Redaksi Media
 
-Source eksperimen `src/admin.*` dan `supabase/media_schema.sql` masih disimpan untuk pengembangan kelak. Jangan menjalankan SQL ini di database produksi tanpa review dan migrasi yang disetujui. Di deployment saat ini dashboard redaksi diarahkan ke CMS utama.
+Dashboard `/admin/` menampilkan ringkasan status artikel, filter dan pencarian, editor untuk draft/publikasi/arsip, pratinjau, serta upload gambar ke bucket `bbweb-article-images` (5 MB). Semua mutasi dibatasi backend Supabase Auth + policy `bbweb_admin_full_access` dan admin allowlist. Login memakai akun admin BisaBikinWeb yang sama, bukan membuat akun baru. Draft tidak ditampilkan di website publik; konten published akan masuk saat build GitHub Actions berikutnya. **Jangan** menjalankan `supabase/media_schema.sql` di produksi: file itu arsip opsi CMS independen, bukan dashboard aktif.
+
+**Batasan saat ini:** penjadwalan artikel otomatis per tanggal, analitik traffic riil, pengelolaan iklan, dan editor berlapis persetujuan belum diaktifkan. Aksi publish langsung menyimpan status published di database utama; perubahan website publik menunggu build. Karena Media masih mirror situs utama, noindex tetap aktif.
 
 ## Deployment GitHub Pages
 

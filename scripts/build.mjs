@@ -134,11 +134,19 @@ if(INDEXABLE&&!usingDemo){
  const locs=['/','/cari/','/redaksi/',...categories.map(categoryUrl),...articles.map(articleUrl)];
  await write('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+locs.map(p=>`<url><loc>${ORIGIN+p}</loc></url>`).join('')+'</urlset>');
 }
-if (process.env.MEDIA_CONTENT_SOURCE === 'bbweb') {
-  await write('admin/index.html', `<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Ruang Redaksi | BisaBikinWeb Media</title><link rel="stylesheet" href="/styles.css"></head><body><main class="container empty-page"><span class="eyebrow">RUANG REDAKSI</span><h1>Kelola berita melalui CMS utama.</h1><p>Konten BisaBikinWeb Media saat ini tersinkron dengan CMS BisaBikinWeb. Agar publikasi tidak terpecah, pengelolaan artikel tetap di dashboard utama.</p><a class="explore-button" href="https://bisabikinweb.site/admin/">Buka dashboard BisaBikinWeb →</a><p><a href="/">Kembali ke Media</a></p></main></body></html>`);
-} else {
-  await write('admin/index.html',await readFile(join(root,'src/admin.html'),'utf8'));
-  await write('admin/admin.js',await readFile(join(root,'src/admin.js'),'utf8'));
-  await write('admin/config.js',`window.MEDIA_SUPABASE_CONFIG = ${jsonSafe({url:supabaseUrl,publishableKey:supabaseKey})};`);
-}
+// The Media admin edits the same bbweb_articles records as the main CMS.
+const editorConfig = process.env.MEDIA_CONTENT_SOURCE === 'bbweb' ? (() => {
+  return readFile(join(root, process.env.MEDIA_MAIN_CONFIG_PATH || 'source-main/static-source/lib/supabase.ts'), 'utf8')
+    .then(source => {
+      const url = source.match(/const SUPABASE_URL='([^']+)'/)?.[1] || '';
+      const publishableKey = source.match(/const SUPABASE_KEY='([^']+)'/)?.[1] || '';
+      if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !publishableKey || /^(sb_secret_|service_role)/i.test(publishableKey)) {
+        throw new Error('Konfigurasi publishable admin tidak valid.');
+      }
+      return {url, publishableKey};
+    });
+})() : Promise.resolve({url:supabaseUrl,publishableKey:supabaseKey});
+await write('admin/index.html', await readFile(join(root,'src/admin.html'),'utf8'));
+await write('admin/admin.js', await readFile(join(root,'src/admin.js'),'utf8'));
+await write('admin/config.js', 'window.MEDIA_SUPABASE_CONFIG = '+jsonSafe(await editorConfig)+';');
 console.log(`Built ${articles.length} ${usingDemo?'demonstration':'published'} articles. Pages in dist/. noindex=${!(INDEXABLE&&!usingDemo)}.`);

@@ -12,3 +12,16 @@ test('konten demonstrasi tidak terindeks dan tidak mengaku berita aktual',async(
 test('custom domain terisolasi',async()=>{assert.equal((await read('CNAME')).trim(),'media.bisabikinweb.site');assert.match(await read('robots.txt'),/Allow: \/\n/)});
 test('panel redaksi tanpa kunci rahasia',async()=>{const config=await read('admin/config.js');assert.doesNotMatch(config,/sb_secret_|service_role/);assert.match(await read('admin/index.html'),/Ruang Redaksi/);assert.match(await read('admin/admin.js'),/auth\/v1\/token/)});
 test('search page memiliki data pencarian dan filter',async()=>{const html=await read('cari/index.html');assert.match(html,/searchData/);assert.match(html,/categorySelect/)});
+
+test('admin Media memiliki dashboard penuh untuk CMS utama',async()=>{
+ const h=await read('admin/index.html');
+ const js=await read('admin/admin.js');
+ assert.match(h,/Dashboard Redaksi/);
+ assert.match(h,/Galeri Media/);
+ assert.match(h,/Kelola Artikel/);
+ assert.match(js,/bbweb_articles/);
+ assert.match(js,/bbweb_admin_allowlist/);
+ assert.match(js,/storage\/v1\/object\/bbweb-article-images/);
+ assert.doesNotMatch(js,/media_staff|media_articles/);
+ assert.doesNotMatch(h,/http-equiv="refresh"/);
+});
