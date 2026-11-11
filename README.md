@@ -47,3 +47,19 @@ Dashboard `/admin/` menampilkan ringkasan status artikel, filter dan pencarian, 
 - Validasi HTTPS dan build di GitHub Actions setelah push.
 
 Tampilan berubah lewat deployment repo Media. Tidak perlu menyentuh file toko, checkout, atau halaman utama BisaBikinWeb.
+
+## Pembaruan newsroom (November 2026)
+
+Portal Media kini menambahkan rubrik Politik, Pemerintahan, Olahraga, Otomotif, Hiburan, dan Opini (data akan muncul jika tersedia dalam CMS), sorotan kabar terbaru dari artikel yang berlabel berita, arsip berdasarkan bulan, feed RSS di `/feed.xml`, serta halaman transparansi redaksi: Pedoman Media Siber, Kode Etik, Koreksi, Privasi, Kontak, Kerja Sama, dan Pasang Iklan.
+
+Dashboard `/admin/` kini menampilkan **Audit Editorial** sebagai pemeriksaan heuristik metadata (bukan verifikasi kebenaran), **ekspor CSV**, indikator panjang konten, dan **checklist konfirmasi editor** sebelum menerbitkan berita. Checklist bersifat konfirmasi manual dan tidak disimpan sebagai riwayat persetujuan. Draft tetap dapat disimpan tanpa checklist.
+
+### Aturan SEO yang dipertahankan
+
+Situs Media masih mirror artikel utama dan **noindex**. Sitemap normal dan `news-sitemap.xml` hanya dibuat jika `MEDIA_INDEXABLE=true` dalam kondisi konten produksi. Jangan mengaktifkannya sebelum kanonikal dan migrasi SEO diselesaikan. Feed RSS bukan bukti kelayakan Google News.
+
+### Batas implementasi
+
+Belum ada role Editor/Journalist terpisah yang didukung RLS, jadwal publikasi per artikel, berita otomatis dari feed eksternal, verifikasi fakta otomatis, iklan yang dapat dibeli langsung, newsletter aktif, dan data analitik trafik nyata. Jangan menampilkan fitur tersebut sebagai aktif. Sistem masih menggunakan dashboard administrator dengan allowlist yang sudah tersedia.
+
+Kriteria tes tambahan: `npm test` harus memvalidasi policy pages, feed RSS, dan alat audit admin. Deployment produksi tetap dilindungi validasi build serta memakai artikel sungguhan dari CMS utama.
