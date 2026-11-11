@@ -1,64 +1,60 @@
-name: Deploy BisaBikinWeb media to GitHub Pages
+name: Deploy BisaBikinWeb Media V2
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
   schedule:
     - cron: '31 * * * *'
-
 permissions:
   contents: read
-
 concurrency:
   group: pages-production
   cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
+    env:
+      MEDIA_CONTENT_SOURCE: bbweb
+      MEDIA_MAIN_CONFIG_PATH: source-main/static-source/lib/supabase.ts
+      # Do not index mirrored articles until editorial URL migration is agreed.
+      MEDIA_INDEXABLE: 'false'
     steps:
-      - name: Checkout main BisaBikinWeb source
+      - name: Checkout Media V2
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Checkout existing editorial configuration (read only)
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: mejaviskinc/bisabikinweb
           ref: main
-          path: source
+          path: source-main
           persist-credentials: false
       - name: Setup Node.js 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
-      - name: Install locked dependencies
-        working-directory: source
-        run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Run source tests
-        working-directory: source
+      - name: Test V2 functionality without production data
         run: npm test
-      - name: Build this subdomain
-        working-directory: source
+        env:
+          MEDIA_CONTENT_SOURCE: demo
+      - name: Build with existing published editorial content
+        run: npm run build
+      - name: Validate real publication and avoid accidental SEO duplication
         run: |
-          npm run build:media
-          node scripts/prepare-pages-subdomains.mjs media
-      - name: Validate deployment package
-        working-directory: source
-        run: |
-          test -f pages-media/index.html
-          test -f pages-media/CNAME
-          test -f pages-media/.nojekyll
-          test -d pages-media/assets
-          test ! -f pages-media/_headers
-          test ! -f pages-media/_redirects
-          test ! -f pages-media/sitemap.xml
-          test -f pages-media/artikel/index.html
-          test -f pages-media/berita/index.html
-          test ! -d pages-media/checkout
-          test ! -d pages-media/admin
+          test -f dist/index.html
+          test -f dist/CNAME
+          test -f dist/admin/index.html
+          test ! -f dist/sitemap.xml
+          grep -q 'noindex,nofollow' dist/index.html
+          ! grep -q 'Konten demonstrasi' dist/index.html
+          test "$(find dist/artikel -mindepth 1 -maxdepth 1 -type d | wc -l)" -gt 0
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           name: github-pages-media
-          path: source/pages-media
+          path: dist
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
