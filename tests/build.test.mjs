@@ -33,7 +33,7 @@ test('portal media memiliki arsip, RSS, dan halaman transparansi redaksi',async(
   }
   assert.match(await read('feed.xml'),/<rss version="2.0">/);
   assert.match(await read('arsip/index.html'),/Arsip berita/);
-  assert.match(await read('index.html'),/href="\\/feed.xml"/);
+  assert.ok((await read('index.html')).includes('href="/feed.xml"'));
   await assert.rejects(access(join(root,'dist/news-sitemap.xml')));
 });
 test('dashboard menyediakan audit editorial, ekspor CSV, dan checklist publikasi',async()=>{
