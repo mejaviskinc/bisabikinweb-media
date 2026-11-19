@@ -49,6 +49,7 @@
       image:safeImage(a.cover_image_url),published_at:a.published_at||'',updated_at:a.updated_at||'',
       author:a.author_store_name||'Redaksi BisaBikinWeb',
       body:Array.isArray(a.body)?a.body.map(String):[],read:a.read_time||'5 menit',
+      image_alt:a.image_alt||'',image_caption:a.image_caption||'',image_credit:a.image_credit||'',image_license:a.image_license||'',image_source_url:a.image_source_url||'',source_urls:Array.isArray(a.source_urls)?a.source_urls:[],
       url:'/baca/?slug='+encodeURIComponent(a.id)
     };
   }
@@ -65,11 +66,11 @@
       return data.filter(valid).map(normalize);
     }finally{clearTimeout(timeout);}
   }
-  var fields='id,title,category,summary,body,read_time,cover_image_url,published_at,updated_at,author_store_name,author_type,seller_id,status,is_active';
+  var fields='id,title,category,summary,body,read_time,cover_image_url,published_at,updated_at,author_store_name,author_type,seller_id,status,is_active,source_urls,image_source_url,image_credit,image_license,image_caption,image_alt';
   function img(a){
     var link=safeImage(a.image);
     if(!link)return element('div','story-img image-placeholder','MEDIA');
-    var node=element('img','story-img');node.src=link;node.alt='Gambar untuk '+a.title;node.loading='lazy';node.decoding='async';node.referrerPolicy='no-referrer';return node;
+    var node=element('img','story-img');node.src=link;node.alt=a.image_alt||'Gambar untuk '+a.title;node.loading='lazy';node.decoding='async';node.referrerPolicy='no-referrer';return node;
   }
   function card(a){
     var article=element('article','story-card');
@@ -128,11 +129,16 @@
     var share=element('div','share-buttons');var wa=element('a','text-link','Bagikan ke WhatsApp ↗');wa.href='https://wa.me/?text='+encodeURIComponent(a.title+' '+location.href);wa.rel='noopener noreferrer';wa.target='_blank';
     share.appendChild(wa);toolbar.append(avatar,author,share);heading.appendChild(toolbar);article.appendChild(heading);
     var figure=element('figure','article-cover');var imageUrl=safeImage(a.image);
-    if(imageUrl){var picture=element('img','article-cover-img');picture.src=imageUrl;picture.alt='Gambar artikel: '+a.title;picture.loading='eager';picture.referrerPolicy='no-referrer';figure.appendChild(picture);}
+    if(imageUrl){var picture=element('img','article-cover-img');picture.src=imageUrl;picture.alt=a.image_alt||'Gambar artikel: '+a.title;picture.loading='eager';picture.referrerPolicy='no-referrer';figure.appendChild(picture);}
     else figure.appendChild(element('div','article-cover-img image-placeholder','MEDIA'));
-    figure.appendChild(element('figcaption','','Gambar artikel. Hak penggunaan dan sumber perlu diperiksa pada catatan editorial.'));article.appendChild(figure);
+    var caption=element('figcaption','',a.image_caption||'Gambar artikel');
+    if(a.image_credit)caption.appendChild(document.createTextNode(' · Kredit: '+a.image_credit));
+    if(a.image_license)caption.appendChild(document.createTextNode(' · Lisensi: '+a.image_license));
+    var original=safeImage(a.image_source_url);if(original){var sourcePhoto=element('a','',' Sumber foto ↗');sourcePhoto.href=original;sourcePhoto.target='_blank';sourcePhoto.rel='noopener noreferrer';caption.appendChild(sourcePhoto);}
+    figure.appendChild(caption);article.appendChild(figure);
     var body=element('div','article-body live-reading-body');body.id='isi-artikel';
     (a.body.length?a.body:[a.excerpt]).forEach(function(p,i){readParagraph(body,p,i);});
+    if(a.source_urls.length){var refs=element('section','article-sources');refs.appendChild(element('h2','','Sumber dan Referensi'));var ul=element('ul');a.source_urls.forEach(function(url){var link=safeImage(url);if(!link)return;var li=element('li'),anchor=element('a','',link);anchor.href=link;anchor.target='_blank';anchor.rel='noopener noreferrer';li.appendChild(anchor);ul.appendChild(li);});refs.appendChild(ul);body.appendChild(refs);}
     body.appendChild(element('div','article-end','✳ AKHIR ARTIKEL'));article.appendChild(body);
     var correction=element('div','correction-inline','Menemukan informasi yang perlu dikoreksi? ');
     var link=element('a','','Lihat prosedur koreksi dan hak jawab.');link.href='/koreksi/';correction.appendChild(link);article.appendChild(correction);
