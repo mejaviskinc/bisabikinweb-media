@@ -33,5 +33,6 @@
  if(pages){pages.replaceChildren();if(totalPages>1){for(const [label,n,disabled] of [['← Sebelumnya',currentPage-1,currentPage===1],['Halaman '+currentPage+' dari '+totalPages,currentPage,true],['Berikutnya →',currentPage+1,currentPage===totalPages]]){const btn=document.createElement('button');btn.type='button';btn.className='page-button';btn.textContent=label;btn.disabled=disabled;btn.addEventListener('click',()=>{currentPage=n;render();document.getElementById('filterForm')?.scrollIntoView({block:'start'});});pages.append(btn);}}}
  const url=new URL(location.href);if(q)url.searchParams.set('q',input.value.trim());else url.searchParams.delete('q');history.replaceState({},'',url);
  }
- form?.addEventListener('submit',e=>{e.preventDefault();currentPage=1;render()});[select,dateSelect,sortSelect].forEach(el=>el?.addEventListener('change',()=>{currentPage=1;render()}));input?.addEventListener('input',()=>{currentPage=1;render()});render();
+ form?.addEventListener('submit',e=>{e.preventDefault();currentPage=1;render()});[select,dateSelect,sortSelect].forEach(el=>el?.addEventListener('change',()=>{currentPage=1;render()}));input?.addEventListener('input',()=>{currentPage=1;render()});
+ window.addEventListener('bbmedia:livearticles',function(event){const live=Array.isArray(event.detail)?event.detail:[];const ids=new Set(live.map(a=>a.slug));articles=[...live,...articles.filter(a=>!ids.has(a.slug))];currentPage=1;render();});render();
 })();
