@@ -47,3 +47,22 @@ test('dashboard menyediakan audit editorial, ekspor CSV, dan checklist publikasi
   assert.match(js,/function exportCsv/);
   assert.match(js,/verifyRights/);
 });
+
+test('live CMS browser pages use a safe publishable key with no server credentials',async()=>{
+  const html=await read('index.html');
+  const dynamic=await read('baca/index.html');
+  const config=await read('live-config.js');
+  const client=await read('live.js');
+  assert.match(html,/id="liveCms"/);
+  assert.match(html,/src="\/live\.js"/);
+  assert.match(dynamic,/id="liveArticle"/);
+  assert.match(dynamic,/noindex,nofollow/);
+  assert.match(config,/MEDIA_SUPABASE_CONFIG/);
+  assert.doesNotMatch(config,/sb_secret_|service_role/);
+  assert.match(client,/bbweb_articles/);
+  assert.match(client,/eq\.published/);
+  assert.match(client,/is\.null/);
+});
+test('admin links published records to the instant CMS reader',async()=>{
+  assert.match(await read('admin/admin.js'),/\/baca\/\?slug=/);
+});
